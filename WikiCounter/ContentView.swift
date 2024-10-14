@@ -30,9 +30,12 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
 
-            Text(articleText)
             ProgressView()
                 .opacity(isLoading ? 1 : 0)
+
+            ScrollView {
+                Text(articleText)
+            }
         }
         .padding()
     }
@@ -59,16 +62,41 @@ struct ContentView: View {
             let (data, _) = try await URLSession.shared.data(from: queryUrl)
             isLoading = false
 
+            print(String(data: data, encoding: String.Encoding.utf8) ?? "NIL")
+
+            let wikiResponse = try JSONDecoder().decode(WikiResponse.self, from: data)
+
+            // Extract the HTML content and convert to plain text
+            let htmlContent = wikiResponse.wikiResult.articleText.content
+            let plainText = convertHTMLToPlainText(htmlContent)
+
+            print(plainText)
+
+            await MainActor.run {
+                self.articleText = plainText ?? "Could not parse article content."
+                self.occurrenceCount = 0
+            }
 
         } catch {
             // error
         }
 
         // handle no result/error
-        // parse
         // count the number of occurrences
         // assign to the counter
         // reset topic string
+    }
+
+    func convertHTMLToPlainText(_ htmlString: String) -> String? {
+        guard let data = htmlString.data(using: .utf8) else { return nil }
+
+        do {
+            let attributedString = try NSAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil)
+            return attributedString.string
+        } catch {
+            print("Error converting the text to HTML: \(error)")
+            return nil
+        }
     }
 }
 
@@ -76,35 +104,33 @@ struct ContentView: View {
     ContentView()
 }
 
-// save search field content (requested topic)
-// create request
-// send request
-// create loader
-// load while fetching data
-// get response
-// parse response
-// create regex for removing html tags
 // create counting logic
 // display the number of occurrences
 
 struct WikiResponse: Decodable {
-    let result: Result?
+    let wikiResult: WikiResult
 
     enum CodingKeys: String, CodingKey {
-        case result = "parse"
+        case wikiResult = "parse"
     }
 }
 
-struct Result: Decodable {
-    let title: String?
-    let pageid: Int?
-    let text: ArticleText?
-}
-
-struct ArticleText: Codable {
-    let base: String?
+struct WikiResult: Decodable {
+    let title: String
+    let pageid: Int
+    let articleText: WikiArticleText
 
     enum CodingKeys: String, CodingKey {
-        case base = "*"
+        case title, pageid
+        case articleText = "text"
     }
 }
+
+struct WikiArticleText: Decodable {
+    let content: String
+
+    enum CodingKeys: String, CodingKey {
+        case content = "*"
+    }
+}
+
