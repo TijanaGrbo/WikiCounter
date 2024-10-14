@@ -1,5 +1,8 @@
 # Coding assignment 💪
 
+NB! [Planning for failure is here too](https://github.com/TijanaGrbo/WikiCounter/blob/main/Planning%20for%20failure.md). Go check it out 😎
+
+
 This assignment seemed completely straightforward when I read it for the first time.
 However, the more I thought about it, the more potential issues I could think of:
 
