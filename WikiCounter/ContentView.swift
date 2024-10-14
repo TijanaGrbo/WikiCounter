@@ -31,8 +31,6 @@ struct ContentView: View {
         .padding()
     }
 
-        // format topic
-        // set loading state
         // send the request
     func searchForTopic(for topic: String) async {
         guard !topic.isEmpty else {
@@ -40,6 +38,17 @@ struct ContentView: View {
             occurrenceCount = 0
             return
         }
+
+        let formattedTopic = topic.replacingOccurrences(of: " ", with: "_")
+        // separate the url into multiple components for better readability if there's time
+        let urlString = "https://en.wikipedia.org/w/api.php?action=parse&section=0&prop=text&format=json&redirects=true&page=\(formattedTopic)"
+        guard let queryUrl = URL(string: urlString) else {
+            articleText = "Invalid URL"
+            occurrenceCount = 0
+            return
+        }
+
+        isLoading = true
 
         // handle no result/error
         // parse
