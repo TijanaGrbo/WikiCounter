@@ -8,12 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var topic = ""
+    @State private var occurenceCount = 0
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(spacing: 20) {
+            TextField("Search for a Wiki topic", text: $topic)
+                .textFieldStyle(.roundedBorder)
+                .padding(.vertical)
+            Button {
+                // search for an article
+            } label: {
+                Text("Search")
+                    .padding(8)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
     }
@@ -22,3 +32,14 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+// save search field content (requested topic)
+// create request
+// send request
+// create loader
+// load while fetching data
+// get response
+// parse response
+// create regex for removing html tags
+// create counting logic
+// display the number of occurences
