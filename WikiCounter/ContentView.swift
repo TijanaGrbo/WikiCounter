@@ -20,7 +20,9 @@ struct ContentView: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.vertical)
             Button {
-                // search for an article
+                Task {
+                    await searchForTopic(for: topic)
+                }
             } label: {
                 Text("Search")
                     .padding(8)
