@@ -1,4 +1,4 @@
-# Planning for failure
+# Planning for failure 😨
 
 ### Unhappy customer number 1
 ###### The issue:
@@ -44,5 +44,5 @@ My first impression was that something might had blocked the main thread, theref
 As in the previous scenarios:
 * Check the logic for button state update, might want to disable it as soon as it’s tapped and not wait for the request to fire
 * Put the button in the loading state or show a spinner
-* If there’s a retry, or the request has been sent multiple times for whatever reason, generate the idempotency key, put it in the request header and make sure you send it with every attempt. Maybe combine it with user or device ID as another layer of uniqueness.
+* If there’s a retry, or the request has been sent multiple times for whatever reason, generate the idempotency key, put it in the request header and make sure you send it with every retry. Maybe combine it with user or device ID as another layer of uniqueness.
 * Store an order as a pending one until it gets resolved by the API response and check if there are any pending orders before sending out another request
