@@ -29,6 +29,10 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+
+            Text(articleText)
+            ProgressView()
+                .opacity(isLoading ? 1 : 0)
         }
         .padding()
     }
