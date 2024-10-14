@@ -74,13 +74,9 @@ struct ContentView: View {
 
             isLoading = false
 
-            print(String(data: data, encoding: String.Encoding.utf8) ?? "NIL")
-
             let response = try JSONDecoder().decode(WikiResponse.self, from: data)
             let plainText = response.query.pages.first?.value.extract ?? ""
             let occurrences = countOccurrences(of: topic.lowercased(), in: plainText.lowercased())
-
-            print(plainText)
 
             updateTextAndCounter(text: plainText, count: occurrences)
         } catch {
@@ -109,18 +105,15 @@ struct ContentView: View {
     ContentView()
 }
 
-// Root struct
 struct WikiResponse: Decodable {
     let batchcomplete: String
     let query: Query
 }
 
-// Query struct
 struct Query: Decodable {
-    let pages: [String: Page]  // The pages property is a dictionary where keys are the page IDs
+    let pages: [String: Page]
 }
 
-// Page struct
 struct Page: Codable {
     let pageid: Int
     let ns: Int
