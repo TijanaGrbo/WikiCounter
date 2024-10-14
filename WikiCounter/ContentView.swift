@@ -31,7 +31,6 @@ struct ContentView: View {
         .padding()
     }
 
-        // send the request
     func searchForTopic(for topic: String) async {
         guard !topic.isEmpty else {
             articleText = "Please enter a search term"
@@ -49,6 +48,13 @@ struct ContentView: View {
         }
 
         isLoading = true
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: queryUrl)
+            isLoading = false
+        } catch {
+            // error
+        }
 
         // handle no result/error
         // parse
