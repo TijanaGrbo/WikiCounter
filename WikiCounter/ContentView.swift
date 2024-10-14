@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var topic = ""
     @State private var occurrenceCount = 0
 
+    @State private var articleText = ""
     @State private var isLoading = false
 
     var body: some View {
@@ -30,11 +31,16 @@ struct ContentView: View {
         .padding()
     }
 
-    func searchForTopic(for topic: String) {
-        // check if the text field is empty
         // format topic
         // set loading state
         // send the request
+    func searchForTopic(for topic: String) async {
+        guard !topic.isEmpty else {
+            articleText = "Please enter a search term"
+            occurrenceCount = 0
+            return
+        }
+
         // handle no result/error
         // parse
         // count the number of occurrences
