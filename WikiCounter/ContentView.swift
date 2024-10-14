@@ -16,9 +16,19 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 20) {
+            VStack {
+                Text("The phrase '\(topic)' occurs")
+                Text(occurrenceCount.description)
+                    .font(.largeTitle)
+                    .bold()
+                Text("times.")
+            }
+            .padding()
+
             TextField("Search for a Wiki topic", text: $topic)
                 .textFieldStyle(.roundedBorder)
                 .padding(.vertical)
+
             Button {
                 Task {
                     await searchForTopic(for: topic)
@@ -38,21 +48,22 @@ struct ContentView: View {
             }
         }
         .padding()
+        .onChange(of: topic) {
+            occurrenceCount = 0
+        }
     }
 
     func searchForTopic(for topic: String) async {
         guard !topic.isEmpty else {
-            articleText = "Please enter a search term"
-            occurrenceCount = 0
+            updateTextAndCounter(text: "Please enter a search term", count: 0)
             return
         }
 
-        let formattedTopic = topic.replacingOccurrences(of: " ", with: "_")
-        // separate the url into multiple components for better readability if there's time
-        let urlString = "https://en.wikipedia.org/w/api.php?action=parse&section=0&prop=text&format=json&redirects=true&page=\(formattedTopic)"
+        let formattedTopic = topic.replacingOccurrences(of: " ", with: "_").lowercased()
+        let urlString = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&explaintext=1&redirects=1&titles=\(formattedTopic)"
+
         guard let queryUrl = URL(string: urlString) else {
-            articleText = "Invalid URL"
-            occurrenceCount = 0
+            updateTextAndCounter(text: "Invalid URL", count: 0)
             return
         }
 
@@ -60,42 +71,36 @@ struct ContentView: View {
 
         do {
             let (data, _) = try await URLSession.shared.data(from: queryUrl)
+
             isLoading = false
 
             print(String(data: data, encoding: String.Encoding.utf8) ?? "NIL")
 
-            let wikiResponse = try JSONDecoder().decode(WikiResponse.self, from: data)
-
-            // Extract the HTML content and convert to plain text
-            let htmlContent = wikiResponse.wikiResult.articleText.content
-            let plainText = convertHTMLToPlainText(htmlContent)
+            let response = try JSONDecoder().decode(WikiResponse.self, from: data)
+            let plainText = response.query.pages.first?.value.extract ?? ""
+            let occurrences = countOccurrences(of: topic.lowercased(), in: plainText.lowercased())
 
             print(plainText)
 
-            await MainActor.run {
-                self.articleText = plainText ?? "Could not parse article content."
-                self.occurrenceCount = 0
-            }
-
+            updateTextAndCounter(text: plainText, count: occurrences)
         } catch {
-            // error
+            updateTextAndCounter(text: "Error: \(error.localizedDescription)", count: 0)
         }
-
-        // handle no result/error
-        // count the number of occurrences
-        // assign to the counter
-        // reset topic string
     }
 
-    func convertHTMLToPlainText(_ htmlString: String) -> String? {
-        guard let data = htmlString.data(using: .utf8) else { return nil }
+    func updateTextAndCounter(text: String, count: Int) {
+        articleText = text
+        occurrenceCount = count
+    }
 
+    func countOccurrences(of phrase: String, in text: String) -> Int {
         do {
-            let attributedString = try NSAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil)
-            return attributedString.string
+            let regex = try NSRegularExpression(pattern: "\(NSRegularExpression.escapedPattern(for: phrase))", options: .caseInsensitive)
+            let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            return matches.count
         } catch {
-            print("Error converting the text to HTML: \(error)")
-            return nil
+            print("Error creating regex: \(error.localizedDescription)")
+            return 0
         }
     }
 }
@@ -104,33 +109,21 @@ struct ContentView: View {
     ContentView()
 }
 
-// create counting logic
-// display the number of occurrences
-
+// Root struct
 struct WikiResponse: Decodable {
-    let wikiResult: WikiResult
-
-    enum CodingKeys: String, CodingKey {
-        case wikiResult = "parse"
-    }
+    let batchcomplete: String
+    let query: Query
 }
 
-struct WikiResult: Decodable {
-    let title: String
+// Query struct
+struct Query: Decodable {
+    let pages: [String: Page]  // The pages property is a dictionary where keys are the page IDs
+}
+
+// Page struct
+struct Page: Codable {
     let pageid: Int
-    let articleText: WikiArticleText
-
-    enum CodingKeys: String, CodingKey {
-        case title, pageid
-        case articleText = "text"
-    }
+    let ns: Int
+    let title: String
+    let extract: String
 }
-
-struct WikiArticleText: Decodable {
-    let content: String
-
-    enum CodingKeys: String, CodingKey {
-        case content = "*"
-    }
-}
-
