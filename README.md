@@ -24,7 +24,7 @@ Some time later, my quick word counter app was seemingly working. That is, until
 If there’s an established primary topic for the search term, you would have the `redirects`  object that would contain `from` and `to` properties. In that case, `redirects=true` would work in terms of returning one of the relevant articles. However, I started comparing responses for different terms, and not all of them have `redirects` property. Some terms did seem to have it, but it was an empty array.
 
 ## Solution nr. 2 🥇
-So another solution is to use OpensearchAPI with the following or similar query structure:
+So another solution is to use Opensearch API with the following or similar query structure:
 
 https://en.wikipedia.org/w/api.php?action=opensearch&search=Apple&limit=1&namespace=0
 
