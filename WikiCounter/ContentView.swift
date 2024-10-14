@@ -9,7 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var topic = ""
-    @State private var occurenceCount = 0
+    @State private var occurrenceCount = 0
+
+    @State private var isLoading = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -27,6 +29,17 @@ struct ContentView: View {
         }
         .padding()
     }
+
+    func searchForTopic(for topic: String) {
+        // check if the text field is empty
+        // format topic
+        // set loading state
+        // send the request
+        // handle no result/error
+        // parse
+        // count the number of occurrences
+        // assign to the counter
+    }
 }
 
 #Preview {
@@ -42,4 +55,4 @@ struct ContentView: View {
 // parse response
 // create regex for removing html tags
 // create counting logic
-// display the number of occurences
+// display the number of occurrences
