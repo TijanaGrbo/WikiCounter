@@ -58,6 +58,8 @@ struct ContentView: View {
         do {
             let (data, _) = try await URLSession.shared.data(from: queryUrl)
             isLoading = false
+
+
         } catch {
             // error
         }
@@ -66,6 +68,7 @@ struct ContentView: View {
         // parse
         // count the number of occurrences
         // assign to the counter
+        // reset topic string
     }
 }
 
@@ -83,3 +86,25 @@ struct ContentView: View {
 // create regex for removing html tags
 // create counting logic
 // display the number of occurrences
+
+struct WikiResponse: Decodable {
+    let result: Result?
+
+    enum CodingKeys: String, CodingKey {
+        case result = "parse"
+    }
+}
+
+struct Result: Decodable {
+    let title: String?
+    let pageid: Int?
+    let text: ArticleText?
+}
+
+struct ArticleText: Codable {
+    let base: String?
+
+    enum CodingKeys: String, CodingKey {
+        case base = "*"
+    }
+}
